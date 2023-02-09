@@ -51,8 +51,9 @@ def read_data(elections):
         df1 = df1.unionByName(df2)
     return df1
 
-spark = SparkSession.builder.appName('spark-dataframe-demo').getOrCreate()
-
+# spark = SparkSession.builder.appName('spark-dataframe-demo').getOrCreate()
+from pyspark import SparkConf, SparkContext
+spark = SparkContext(conf=SparkConf().setAppName("MyApp").setMaster("local"))
 @st.cache(allow_output_mutation=True)
 def create_df():
     merged_df = read_data([25, 23,22,21,20])
