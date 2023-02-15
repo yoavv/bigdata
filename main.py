@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import pydeck as pdk
-from pyproj import Transformer
 import random
 import altair as alt
 import math
