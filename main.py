@@ -4,7 +4,7 @@ import pydeck as pdk
 from pyproj import Transformer
 import random
 import altair as alt
-
+import math
 
 def b_percent(x):
     d = {'אמת': 'nb', 'ב': 'nb', 'ג': 'b', 'ד': 'a', 'ו': 'a', 'ודעם': 'a', 'ום': 'a', 'ט': 'b', 'טב': 'nb', 'כ': 'b',
@@ -23,11 +23,11 @@ def b_percent(x):
     return b_count/(b_count+nb_count)
 
 
-transformer = Transformer.from_crs("EPSG:3857", "EPSG:4326")
-def convert_coords(x1, y1):
-    x2, y2 = transformer.transform(x1, y1)
-    return pd.Series([x2, y2])
-
+def epsg3857_to_epsg4326(x, y):
+    x = (x * 180) / 20037508.34
+    y = (y * 180) / 20037508.34
+    y = (math.atan(math.pow(math.e, y * (math.pi / 180))) * 360) / math.pi - 90
+    return x, y
 
 @st.cache
 def get_colors(votes):
