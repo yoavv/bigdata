@@ -5,6 +5,7 @@ import random
 import altair as alt
 import math
 
+
 def b_percent(x):
     d = {'אמת': 'nb', 'ב': 'nb', 'ג': 'b', 'ד': 'a', 'ו': 'a', 'ודעם': 'a', 'ום': 'a', 'ט': 'b', 'טב': 'nb', 'כ': 'b',
          'כן': 'nb', 'ל': 'nb', 'מחל': 'b', 'מרץ': 'nb', 'מרצ': 'nb', 'נ': 'nb', 'עם': 'a', 'פה': 'nb', 'צפ': 'nb',
@@ -26,7 +27,8 @@ def epsg3857_to_epsg4326(x, y):
     x = (x * 180) / 20037508.34
     y = (y * 180) / 20037508.34
     y = (math.atan(math.pow(math.e, y * (math.pi / 180))) * 360) / math.pi - 90
-    return x, y
+    return pd.Series([ y,x])
+
 
 @st.cache
 def get_colors(votes):
@@ -57,7 +59,7 @@ def preprocess_data():
 
     party_colors = get_colors(votes)
     votes["color"] = votes.apply(lambda x: party_colors[x["leader"]], axis=1)
-    cities[["lat", "lon"]] = cities.apply(lambda x: convert_coords(x["X"], x["Y"]), axis=1)
+    cities[["lat", "lon"]] = cities.apply(lambda x: epsg3857_to_epsg4326(x["X"], x["Y"]), axis=1)
 
     df = pd.merge(cities, votes, left_on='SETL_CODE', right_on='סמל ישוב')
     df = df.rename(columns={"מצביעים": "voters", "שם ישוב": "name", "בזב": "num_eligible_to_vote"})
