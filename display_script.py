@@ -42,7 +42,6 @@ def rea_results_file(elections_num):
     try:
         temp_df = pd.read_csv("{}.csv".format(elections_num))
     except UnicodeDecodeError:
-        print(elections_num)
         temp_df = pd.read_csv("{}.csv".format(elections_num), encoding="iso8859_8")
     temp_df["elections"] = elections_num
 
@@ -144,3 +143,8 @@ draw_voting_map()
 draw_voting_tables()
 draw_percentage_chart()
 draw_comparison_chart()
+'''
+    [![Repo](https://badgen.net/badge/icon/GitHub?icon=github&label)]("https://github.com/yoavv/bigdata") 
+
+'''
+st.markdown("<br>",unsafe_allow_html=True)
