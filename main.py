@@ -141,6 +141,6 @@ chosen_elections_df = df[df["elections"] == elections]
 
 
 draw_voting_map()
-draw_percentage_chart()
 draw_voting_tables()
+draw_percentage_chart()
 draw_comparison_chart()
