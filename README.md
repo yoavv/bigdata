@@ -1,2 +1,2 @@
 # bigdata
-web app deloy on on https://yoavv-bigdata-main-u8dyd3.streamlit.app/
+web app deloy on on https://yoavv-bigd-private-display-xip7n8.streamlit.app/
