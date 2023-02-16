@@ -66,9 +66,6 @@ def read_data(elections):
     return df1
 
 
-spark = SparkSession.builder.appName('spark-dataframe-demo').getOrCreate()
-
-
 @st.cache(allow_output_mutation=True)
 def create_df():
     merged_dfs = read_data([25, 24, 23, 22, 21, 20, 19])
@@ -99,7 +96,7 @@ def create_df():
     merged_dfs = merged_dfs.withColumn('percentage', 100 * (merged_dfs.voters / merged_dfs.num_eligible_to_vote))
     merged_dfs = merged_dfs.withColumn('percentage', merged_dfs.percentage.cast('int'))
 
-    merged_dfs.withColumn('bet_percent', 100 * (merged_dfs["ב"] / merged_dfs.num_eligible_to_vote))
+    merged_dfs.withColumn('benet_percent', 100 * (merged_dfs["ב"] / merged_dfs.num_eligible_to_vote))
     return merged_dfs
 
 
@@ -118,7 +115,7 @@ def draw_voting_tables():
 
 def create_comparison_df():
     df = merged_df.filter(merged_df.num_eligible_to_vote > 100000)
-    df = df.withColumn("bet_percent", df["ב"] / df["num_eligible_to_vote"])
+    df = df.withColumn("benet_percent", df["ב"] / df["num_eligible_to_vote"])
 
     numeric_cols = []
     for k, v in party_to_wing_dict.items():
@@ -126,9 +123,9 @@ def create_comparison_df():
             numeric_cols.append(k)
     from operator import add
     from functools import reduce
-    df = df.withColumn('b_sum', reduce(add, [col(x) for x in numeric_cols]))
+    df = df.withColumn('bibi_sum', reduce(add, [col(x) for x in numeric_cols]))
 
-    df = df.withColumn("b_percent", df["b_sum"] / df["voters"])
+    df = df.withColumn("bibi_percent", df["bibi_sum"] / df["voters"])
     df_24 = df.filter(df.elections == 24)
     df_25 = df.filter(df.elections == 25)
 
@@ -137,8 +134,8 @@ def create_comparison_df():
     df_25 = df_25.select([f.col(c).alias(c + "_25") for c in df.columns])
     df_24_25 = df_24.join(df_25, df_24.SETL_CODE_24 == df_25.SETL_CODE_25)
     df_24_25 = df_24_25.withColumn("voting_diff", df_24_25['percentage_25'] - df_24_25['percentage_24'])
-    df_24_25 = df_24_25.withColumn("b_diff", 100 * (
-            df_24_25['b_percent_25'] - df_24_25['b_percent_24'] - df_24_25['bet_percent_24']))
+    df_24_25 = df_24_25.withColumn("bibi_diff", 100 * (
+            df_24_25['bibi_percent_25'] - df_24_25['bibi_percent_24'] - df_24_25['benet_percent_24']))
     return df_24_25
 
 
@@ -179,7 +176,10 @@ def draw_voting_map():
                               pickable=True)], ))
 
 
+spark = SparkSession.builder.appName('spark-dataframe-demo').getOrCreate()
 merged_df = create_df()
+st.title("Election Trends in Israel")
+st.title("Yoav Valinsky & Daniel Neimark")
 election_num = st.slider("elections", 19, 25)
 chosen_elections_df = merged_df.filter(merged_df.elections == election_num)
 df_compare = create_comparison_df()
