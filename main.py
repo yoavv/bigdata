@@ -17,6 +17,12 @@ party_to_wing_dict = {'אמת': 'nb', 'ב': 'nb', 'ג': 'b', 'ד': 'a', 'ו': 'a
 
 
 def epsg3857_to_epsg4326(x, y):
+    """
+    THis function converts from ITM (isreali coordinte system) to wgs84 which is a global coordinate system
+    :param x: x in meters
+    :param y: y in meters
+    :return: (x, y) in degrees (lat, lon) values
+    """
     x = (x * 180) / 20037508.34
     y = (y * 180) / 20037508.34
     y = (math.atan(math.pow(math.e, y * (math.pi / 180))) * 360) / math.pi - 90
@@ -25,6 +31,12 @@ def epsg3857_to_epsg4326(x, y):
 
 @st.cache
 def get_colors(party_name_list):
+    """
+    This function is used in order to generate a unique color for all cities with the same leading party
+    This is cached so that the color does not change between runs or queries
+    :param party_name_list:
+    :return: a dict where the key is the party string and the value is a tuple of RGB values
+    """
     colors = {}
     for party in party_name_list:
         colors[party] = [random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)]
@@ -39,10 +51,21 @@ def translate(mapping):
 
 
 def argmax(cols, *args):
+    """
+    THis function is utilizied to find the highes voting party in each city
+    :param cols: columns to find max on
+    :param args: values of columns
+    :return: list of resulting leader in each city in each election
+    """
     return [c for c, v in zip(cols, args) if v == max(args)][0]
 
 
 def read_data(elections):
+    """
+    This function reads multiple election results files in to a single database
+    :param elections List[int]: election number list
+    :return: df1 (Spark DataFrame) aggregated election results
+    """
     elections.sort(reverse=True)
     df1 = spark.read.csv("{}.csv".format(elections[0]), inferSchema=True, header=True)
     df1 = df1.withColumn("elections", lit(elections[0]))
@@ -68,6 +91,9 @@ def read_data(elections):
 
 @st.cache(allow_output_mutation=True)
 def create_df():
+    """
+    This function reads the data from files and preprocesses it
+    """
     merged_dfs = read_data([25, 24, 23, 22, 21, 20, 19])
     merged_dfs = merged_dfs.withColumnRenamed("סמל ישוב", "SETL_CODE")
     merged_dfs = merged_dfs.withColumnRenamed("מצביעים", "voters")
@@ -101,6 +127,10 @@ def create_df():
 
 
 def draw_voting_tables():
+    """
+    THis function creates an renders dynamically the lowest and highest voting cities for the relevvant elections
+    :return:
+    """
     chosen_elections_df.sort("percentage", ascending=False)
     col1, col2 = st.columns(2)
 
@@ -114,6 +144,9 @@ def draw_voting_tables():
 
 
 def create_comparison_df():
+    """
+    This functions processes the database to create the correlation data found in our research
+    """
     df = merged_df.filter(merged_df.num_eligible_to_vote > 100000)
     df = df.withColumn("benet_percent", df["ב"] / df["num_eligible_to_vote"])
 
@@ -140,6 +173,9 @@ def create_comparison_df():
 
 
 def draw_comparison_chart():
+    """
+    This functions renders the database to two plots showing te correlation found in our research
+    """
     a = alt.Chart(df_compare.toPandas(), title="voting participation vs conservative percentage").mark_line(
         opacity=1).encode(
         x='name_24', y='voting_diff')
@@ -151,6 +187,9 @@ def draw_comparison_chart():
 
 
 def draw_percentage_chart():
+    """
+    This functions renders the database to a voting participation plot dynamically
+    """
     percent_df = merged_df.groupBy("elections").sum("num_eligible_to_vote", "voters")
 
     percent_df = percent_df.withColumn("percent", percent_df["sum(voters)"] / percent_df["sum(num_eligible_to_vote)"])
@@ -162,6 +201,9 @@ def draw_percentage_chart():
 
 
 def draw_voting_map():
+    """
+    This functions renders the database to a map view dynamically
+    """
     st.pydeck_chart(
         pdk.Deck(
             map_style=None, tooltip={"html": "<b>{name}</b>: <b>{leader}</b> "},
